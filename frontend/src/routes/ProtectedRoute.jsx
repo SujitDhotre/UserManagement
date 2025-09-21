@@ -12,9 +12,9 @@ const ProtectedRoute = ({ children, adminOnly = false, userOnly = false }) => {
   if (adminOnly && user.type !== 'admin') {
     return <Navigate to="/user-dashboard" replace />;
   }
-   if (userOnly && user.type !== 'user') {
-    return <Navigate to="/add-user" replace />;
-  }
+  //  if (userOnly && user.type !== 'user') {
+  //   return <Navigate to="/add-user" replace />;
+  // }
 
   if (userOnly && user.type !== 'user') {
     return <Navigate to="/admin-dashboard" replace />;

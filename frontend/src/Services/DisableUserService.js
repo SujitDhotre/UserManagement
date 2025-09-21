@@ -2,7 +2,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 function DisableUserService(data) 
 { 
-    return axios.post(`http://localhost:8080/api/users/disable${data}`, {
+    return axios.post(`http://localhost:8081/api/users/disable`,data, {
         headers: {
             "Content-Type": `application/json`,
         }

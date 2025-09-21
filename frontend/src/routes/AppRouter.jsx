@@ -6,7 +6,7 @@ import LoginPage from '../Component/LoginPage';
 import UserDashboard from '../Component/UserDashboard';
 import AdminDashboard from '../Component/AdminDashboard';
 import ProtectedRoute from './ProtectedRoute';
-import AddUserForm from '../Component/AddUserForm';
+// import AddUserForm from '../Component/AddUserForm';
 
 const AppRouter = () => {
   const { user, loading } = useAuth();
@@ -33,14 +33,14 @@ const AppRouter = () => {
         } 
       />
       
-      <Route 
+      {/* <Route 
         path="/add-user" 
         element={
           <ProtectedRoute adminOnly>
             <AddUserForm />
           </ProtectedRoute>
         } 
-      />
+      /> */}
       
       {/* User Routes */}
       <Route 

@@ -1,5 +1,6 @@
 package com.example.userManagement.service;
 
+import com.example.userManagement.DTO.ActiveDisableTO;
 import com.example.userManagement.DTO.LoginTO;
 import com.example.userManagement.DTO.MessageTO;
 import com.example.userManagement.entity.User;
@@ -14,5 +15,5 @@ public interface UserService {
 
     MessageTO userLogIn(LoginTO loginTO) throws RuntimeException;
 
-    MessageTO disableUser(String emailID) throws RuntimeException;
+    MessageTO disableUser(ActiveDisableTO activeDisableTO) throws RuntimeException;
 }

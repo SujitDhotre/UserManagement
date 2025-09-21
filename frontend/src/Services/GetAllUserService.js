@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 
 
 function GetAllUserService() {
-  return axios.get(`http://localhost:8080/api/users/all-users`,{
+  return axios.get(`http://localhost:8081/api/users/all-users`,{
       headers: {
         "Content-Type": `application/json`,
       },

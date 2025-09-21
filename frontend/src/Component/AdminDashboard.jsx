@@ -22,9 +22,28 @@ const AdminDashboard = () => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [showActionMenu, setShowActionMenu] = useState(null);
   const [mockUsers, setMockusers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [disableData , setDisableData] = useState({
+    email:"",
+    status:false
+  })
 
   const user = { name: "Admin User", username: "admin" };
-  const allUsers = mockUsers;
+  
+  // Filter users based on search term and role filter
+  const filteredUsers = mockUsers.filter(user => {
+    const matchesSearch = 
+      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesRole = roleFilter === "all" || user.type === roleFilter;
+    
+    return matchesSearch && matchesRole;
+  });
+  
+  const allUsers = mockUsers; // Keep this for stats
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const handleAddUserClick = () => {
@@ -55,8 +74,7 @@ const AdminDashboard = () => {
           `Are you sure you want to disable user with email: ${userEmail}?`
         )
       ) {
-        DisableUserService(userEmail).then((res)=>{
-
+        DisableUserService(disableData).then((res)=>{
           fecthAllUser();
         })
       }
@@ -65,10 +83,40 @@ const AdminDashboard = () => {
     }
   };
 
- const handleCardAction = (action, userId, userEmail = null) => {
+  // Function to generate user initials
+  const getUserInitials = (firstName, lastName) => {
+    const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : '';
+    const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
+    return firstInitial + lastInitial;
+  };
+
+  const toggleUserStatus = async (userData) => {
+    try {
+      // Update the disable data state
+      setDisableData({
+        email: userData.email,
+        status: userData.status === 'active' ? false : true // Convert status to boolean
+      });
+
+      // Call the service with the updated data
+      const requestData = {
+        email: userData.email,
+        status: userData.status === 'active' ? false : true
+      };
+
+      DisableUserService(requestData).then((res) => {
+        fecthAllUser(); // Refresh the user list
+      });
+    } catch (error) {
+      console.error("Error toggling user status:", error);
+    }
+  };
+
+  const handleCardAction = (action, userId, userEmail = null) => {
     const actionMessages = {
       edit: "Opening edit form",
       delete: "Deleting user",
+      toggleStatus: "Toggling user status"
     };
 
     console.log(`${actionMessages[action]} for user:`, userId);
@@ -84,12 +132,21 @@ const AdminDashboard = () => {
           console.error("User email not provided for deletion");
         }
         break;
+      case "toggleStatus":
+        // userId is now the userData object containing email and status
+        if (userId && userId.email) {
+          toggleUserStatus(userId);
+        } else {
+          console.error("User data not provided for status toggle");
+        }
+        break;
       default:
         break;
     }
 
     setShowActionMenu(null);
   };
+
   const StatCard = ({ title, value, icon: Icon, color, trend }) => (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 hover:border-gray-200 group">
       <div className="flex items-center justify-between">
@@ -133,7 +190,7 @@ const AdminDashboard = () => {
 
       <div className="flex items-center mb-4">
         <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-          {cardUser.avatar}
+          {getUserInitials(cardUser.firstName, cardUser.lastName)}
         </div>
         <div className="ml-4 flex-1">
           <h3 className="font-bold text-gray-900 text-lg">
@@ -172,21 +229,32 @@ const AdminDashboard = () => {
 
       {hoveredCard === cardUser.id && (
         <div className="absolute inset-0 bg-black bg-opacity-20 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="bg-white rounded-lg shadow-xl p-4 flex space-x-2">
-            <button
-              onClick={() => handleCardAction("edit", cardUser.id)}
-              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-              title="Edit User"
-            >
-              <Edit3 className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => handleCardAction("delete", cardUser.id, cardUser.email)}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              title="Delete User"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
+          <div className="bg-white rounded-lg shadow-xl p-4">
+            <div className="flex items-center space-x-3">
+              <span className="text-sm font-medium text-gray-700">
+                {cardUser.activeStaus ? 'Active' : 'Inactive'}
+              </span>
+              <button
+                onClick={() => handleCardAction("toggleStatus", {
+                  email: cardUser.email,
+                  status: cardUser.activeStaus ? 'active' : 'inactive'
+                })}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  cardUser.activeStaus 
+                    ? 'bg-blue-600' 
+                    : 'bg-gray-300'
+                }`}
+                title={`Toggle user status`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-lg transition-transform ${
+                    cardUser.activeStaus 
+                      ? 'translate-x-6' 
+                      : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -264,9 +332,15 @@ const AdminDashboard = () => {
               <input
                 type="text"
                 placeholder="Search users..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <select 
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
                 <option value="all">All Roles</option>
                 <option value="admin">Admin</option>
                 <option value="user">User</option>
@@ -275,9 +349,22 @@ const AdminDashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {allUsers.map((user) => (
-              <UserCard key={user.id} user={user} />
-            ))}
+            {filteredUsers.length > 0 ? (
+              filteredUsers.map((user) => (
+                <UserCard key={user.id} user={user} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
+                <p className="text-gray-500">
+                  {searchTerm || roleFilter !== "all" 
+                    ? "Try adjusting your search or filter criteria"
+                    : "No users available"
+                  }
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

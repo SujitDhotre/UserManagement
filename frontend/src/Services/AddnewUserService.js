@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 function AddnewUserService(data) 
 { 
-    return axios.post("http://localhost:8080/api/users/register",data, {
+    return axios.post("http://localhost:8081/api/users/register",data, {
         headers: {
             "Content-Type": `application/json`,
         }

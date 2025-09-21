@@ -1,5 +1,6 @@
 package com.example.userManagement.service;
 
+import com.example.userManagement.DTO.ActiveDisableTO;
 import com.example.userManagement.DTO.LoginTO;
 import com.example.userManagement.DTO.MessageTO;
 import com.example.userManagement.entity.User;
@@ -72,9 +73,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public MessageTO disableUser(String emailID) throws RuntimeException {
+    public MessageTO disableUser(ActiveDisableTO activeDisableTO) throws RuntimeException {
         try {
 
+            String emailID = activeDisableTO.getEmail();
             Optional<User> optionalUser = userRepository.findByEmail(emailID);
 
             if (optionalUser.isEmpty()) {
@@ -82,9 +84,15 @@ public class UserServiceImpl implements UserService {
             }
 
             User user = optionalUser.get();
+            if (activeDisableTO.isStatus())
+            {
+                user.setActiveStaus(true);
+            }
+            else {
+                user.setActiveStaus(false);
 
-            // set activeStatus = false (disabled)
-            user.setActiveStaus(false);
+            }
+
           userRepository.save(user);
 
             return new MessageTO("User disabled Sucessfully" , false, null);

@@ -1,5 +1,6 @@
 package com.example.userManagement.controller;
 
+import com.example.userManagement.DTO.ActiveDisableTO;
 import com.example.userManagement.DTO.LoginTO;
 import com.example.userManagement.DTO.MessageTO;
 import com.example.userManagement.entity.User;
@@ -33,8 +34,8 @@ public class UserController {
         return  userService.userLogIn(loginTO);
     }
 
-    @PostMapping("/disable{email}")
-    public  MessageTO disableUser(@PathVariable String email) {
-        return  userService.disableUser(email);
+    @PostMapping("/disable")
+    public  MessageTO disableUser(@RequestBody ActiveDisableTO activeDisableTO) {
+        return  userService.disableUser(activeDisableTO);
     }
 }

@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    setUser(null);
+    setUser({});
     setIsAuthenticated(false);
   };
 
